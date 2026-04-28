@@ -54,10 +54,45 @@ def get_imagine(sub: str, epoch: int):
         assert (stds > 0).all() and (stds < 10000).all()
     return pickles
 
+def get_read(sub: str, epoch: int):
+    paths = f"./Chisco/derivatives/preprocessed_pkl/sub-{sub}/eeg/sub-{sub}_task-read_run-0{str(epoch)}_eeg.pkl"
+    if not os.path.exists(paths): return list()
+    pickles = pickle.load(open(paths, "rb"))
+    print(sub, epoch, len(pickles))
+
+    for idx, trial in enumerate(pickles):
+        assert isinstance(trial['input_features'], numpy.ndarray)
+        assert trial['input_features'].dtype == numpy.float64
+        assert trial['input_features'].shape == (1, 125, 1651)
+        input_features = trial['input_features'][0, :122, :]*1000000
+        mean = numpy.absolute(numpy.mean(input_features, axis=1))
+        stds = numpy.std(input_features, axis=1)
+        assert isinstance(input_features, numpy.ndarray)
+        assert input_features.dtype == numpy.float64
+        assert input_features.shape == (122, 1651)
+        assert (mean > 0).all() and (mean < 10000).all()
+        assert (stds > 0).all() and (stds < 10000).all()
+    return pickles
+
+
 def get_dataset(sub: str):
     dsplit = {"input_features": [], "labels": []}
     for epoch in range(1, 46):
         pickles = get_imagine(sub=sub, epoch=epoch)
+        for trial in pickles:
+            input_features = trial['input_features'][0, :122, :]*1000000
+            input_ids = trial['text'].strip()
+
+            input_features = numpy.float32(input_features)
+            input_features = torch.tensor(input_features)
+            dsplit["input_features"].append(input_features)
+            dsplit["labels"].append(input_ids)
+    return dsplit
+
+def get_dataset_read(sub: str):
+    dsplit = {"input_features": [], "labels": []}
+    for epoch in range(1, 46):
+        pickles = get_read(sub=sub, epoch=epoch)
         for trial in pickles:
             input_features = trial['input_features'][0, :122, :]*1000000
             input_ids = trial['text'].strip()

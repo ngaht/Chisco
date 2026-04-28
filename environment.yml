@@ -1,0 +1,22 @@
+name: chisco
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pytorch
+  - torchvision
+  - torchaudio
+  - numpy
+  - scipy
+  - matplotlib
+  - scikit-learn
+  - pandas
+  - mne
+  - mne-icalabel
+  - pyprep
+  - transformers
+  - h5py
+  - mat73
+  - pip
